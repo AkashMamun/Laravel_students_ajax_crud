@@ -17,12 +17,16 @@
                 <div class="col-md-12">
                     <div class="card">
                         <div class="card-header">
-                            <h1>Student <a href="" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#studentModal">Add new student</a></h1>
+                            <h1>Student 
+                                <a href="" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#studentModal">Add new student</a>
+                                <a href="" class="btn btn-danger" id="deleteAllSelectedRecord">Delete Selected</a>
+                            </h1>
                         </div>
                         <div class="card-body">
                             <table id="studentTabel" class="table">
                                 <thead>
                                     <tr>
+                                        <th><input type="checkbox" id="chkCheckAll"></th>
                                         <th>Id</th>
                                         <th>FirstName</th>
                                         <th>LastName</th>
@@ -34,13 +38,15 @@
                                 <tbody>
                                     @foreach ($students as $student )                                   
                                         <tr id="sid{{ $student->id }}">
+                                            <td><input type="checkbox" name="ids" class="checkBoxClass" value="{{ $student->id }}"></td>
                                             <td>{{ $student->id}}</td>
                                             <td>{{ $student->firstname}}</td>
                                             <td>{{ $student->lastname }}</td>
                                             <td>{{ $student->email }}</td>
                                             <td>{{ $student->phone }}</td>
                                             <td>
-                                                <a href="javascript:void(0)" class="btn btn-info">Edit</a>
+                                                <a href="javascript:void(0)" onclick="editStudent({{ $student->id }})" class="btn btn-info"> Edit </a>
+                                                <a href="javascript:void(0)" onclick="deleteStudent({{ $student->id }})" class="btn btn-danger">Delete</a>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -58,34 +64,33 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+          <h5 class="modal-title" id="exampleModalLabel">Add new student </h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
             <form action="" id="studentForm">
                 @csrf
+                <div class="errMsgContainer">
+
+                </div>
                 <div class="form-group">
                     <label for="firstname">First Name</label>
-                    <input type="text" id="firstname" class="form-control" placeholder="Enter your first name">
+                    <input type="text" id="firstname" name="firstname" class="form-control" placeholder="Enter your first name">
                 </div>
                 <div class="form-group">
                     <label for="lastname">Last Name</label>
-                    <input type="text" id="lastname"class="form-control" placeholder="Enter your last name">
+                    <input type="text" id="lastname" name="lastname" class="form-control" placeholder="Enter your last name">
                 </div>
                 <div class="form-group">
                     <label for="email">Email</label>
-                    <input type="text" id="email" class="form-control" placeholder="Enter your email">
+                    <input type="text" id="email" name="email" class="form-control" placeholder="Enter your email">
                 </div>
                 <div class="form-group mt-3">
                     <label for="phone_no">Phone No. </label>
-                    <input type="text" id="phone" class="form-control" placeholder="Enter your phone no">
+                    <input type="text" id="phone" name="phone" class="form-control" placeholder="Enter your phone no">
                 </div>
                 <button type="submit" class="btn btn-primary">Submit</button>
             </form>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary">Save changes</button>
         </div>
       </div>
     </div>
@@ -96,13 +101,16 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+          <h5 class="modal-title" id="exampleModalLabel">Edit student </h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
             <form action="" id="studentEditForm">
                 @csrf
                 <input type="hidden" id="id" name="id">
+                <div class="errMsgContainer">
+
+                </div>
                 <div class="form-group">
                     <label for="firstname">First Name</label>
                     <input type="text" id="firstname2" class="form-control" placeholder="Enter your first name">
@@ -117,14 +125,10 @@
                 </div>
                 <div class="form-group mt-3">
                     <label for="phone_no">Phone No. </label>
-                    <input type="text" id="phone2 " class="form-control" placeholder="Enter your phone no">
+                    <input type="text" id="phone2" class="form-control" placeholder="Enter your phone no">
                 </div>
                 <button type="submit" class="btn btn-primary">Submit</button>
             </form>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary">Save changes</button>
         </div>
       </div>
     </div>
@@ -162,12 +166,100 @@
                         $("#studentForm").modal('hide');
 
                     }
+                },
+            });
+        });
+    </script>
+    <script>
+        function editStudent(id){
+            $.get('/student/'+id,function(student){
+                $("#id").val(student.id);
+                $("#firstname2").val(student.firstname);
+                $("#lastname2").val(student.lastname);
+                $("#email2").val(student.email);
+                $("#phone2").val(student.phone);
+                $("#studentEditModal").modal('toggle');
+
+            });
+        }
+        $("#studentEditForm").submit(function(e){ 
+            e.preventDefault();
+            let id  = $("#id").val(); 
+            let firstname = $("#firstname2").val();
+            let lastname = $("#lastname2").val();
+            let email = $("#email2").val();
+            let phone = $("#phone2").val();
+            let _token = $("input[name = _token]").val();
+
+            $.ajax({
+                url:"{{ route('student.update') }}",
+                type: "PUT",
+                data: {
+                    id : id,
+                    firstname : firstname,
+                    lastname : lastname,
+                    email : email ,
+                    phone : phone,
+                    _token : _token
+                },
+                success:function(response){
+                    $('#sid' + response.id + ' td:nth-child(2)').text(response.firstname);
+                    $('#sid' + response.id + ' td:nth-child(3)').text(response.lastname);
+                    $('#sid' + response.id + ' td:nth-child(4)').text(response.email);
+                    $('#sid' + response.id + ' td:nth-child(5)').text(response.phone);
+                    $("studentEditModal").modal('toggle');
+                    $('#studentEditForm')[0].reset();
                 }
             });
         });
     </script>
     <script>
-        function editStudent()
+        function deleteStudent(id){
+            if(confirm("Dou you really want to delete this record?")){
+                $.ajax({
+                    url:'/student/'+id,
+                    type: 'DELETE',
+                    data: {
+                        _token : $("input[name = _token]").val()
+                    },
+                    success:function(response){
+                        $("#sid"+id).remove();
+
+                    }
+                });
+            }
+        }
+    </script>
+    <script>
+        $(function(e){
+            $("#chkCheckAll").click(function(){
+                $(".checkBoxClass").prop('checked',$(this).prop('checked'));
+            });
+
+            $("#deleteAllSelectedRecord").click(function(e){
+                e.preventDefault();
+                var allids = [];
+
+                $("input:checkbox[name=ids]:checked").each(function(){
+                    allids.push($(this).val());
+                });
+
+                $.ajax({
+                    url:"{{ route('student.deleteSelected')}}",
+                    type:"DELETE",
+                    data:{
+                        _token:$("input[name=_token]").val(),
+                        ids: allids
+                    },
+                    success:function(response){
+                        $.each(allids,function(key,val){
+                            $("#sid"+val).remove();
+                        });
+                    
+                    }
+                });
+            });
+        }); 
     </script>
   </body>
 </html>

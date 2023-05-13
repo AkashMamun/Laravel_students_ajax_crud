@@ -24,6 +24,22 @@ class StudentController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function addStudent(Request $request){
+        // $request->validate(
+        //     [
+        //         'firstname' => 'required',
+        //         'lastname' => 'required',
+        //         'email' => 'required|email|unique:students,email',
+        //         'phone' => 'required|regex:/(01)[0-9]{9}/',
+        //     ],
+        //     [
+        //         'firstname.required' => 'Firstname is required',
+        //         'lastname.required' => 'Lastname is required',
+        //         'email.required' => 'Email is required',
+        //         'email.email' => 'Email must be email',
+        //         'email.unique' => 'Email must be unique',
+        //         'phone.required' => 'Phone number must be required.'
+        //     ]
+        // );
         $student = new Student();
         $student->firstname = $request->firstname;
         $student->lastname = $request->lastname;
@@ -32,10 +48,36 @@ class StudentController extends Controller
         $student->save();
         return response()->json($student);
     }
-    public function create()
-    {
-        //
+
+
+    public function getStudentById($id){
+        $student = Student::find($id);
+
+        return response()->json($student);
+    } 
+    public function updateStudent(Request $request){
+        $student = Student::find($request->id);
+        $student->firstname = $request->firstname;
+        $student->lastname = $request->lastname;
+        $student->phone = $request->phone;
+        $student->email = $request->email;
+        $student->save();
+
+        return response()->json($student);
+
     }
+    public function deleteStudent($id){
+        $student = Student::find($id);
+        $student->delete();
+        return response()->json(['success' => 'Record has been deleted.']);
+    }
+
+    public function deleteCheckedStudents(Request $request){
+        $ids = $request->ids;
+        Student::whereIn('id',$ids)->delete();
+        return response()->json(['success'=>"Students have been deleted!"]);
+    }
+    
 
     /**
      * Store a newly created resource in storage.
