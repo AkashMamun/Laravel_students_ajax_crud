@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Student;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 
 class StudentController extends Controller
 {
@@ -77,7 +78,11 @@ class StudentController extends Controller
         Student::whereIn('id',$ids)->delete();
         return response()->json(['success'=>"Students have been deleted!"]);
     }
-    
+
+    public function local($locale){
+        App::setlocale($locale);
+        return view('student');
+    }
 
     /**
      * Store a newly created resource in storage.

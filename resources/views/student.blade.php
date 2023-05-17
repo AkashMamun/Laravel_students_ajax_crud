@@ -13,12 +13,24 @@
   <body>
     <section style="margin-top:60px">
         <div class="container">
+            <div class="row mb-4">
+                <div class="col-md-3"></div>
+                   <div class="col-md-6">
+                       <strong>Select Language: </strong>
+                       <select class="form-control lang-change">
+                           <option value="en" {{ session()->get('lang_code')=='en' ? 'selected' : ''}}>English</option>
+                           <option value="sp" {{ session()->get('lang_code')=='sp' ? 'selected' : ''}}>Spanish</option>
+                           <option value="bn" {{ session()->get('lang_code')=='bn' ? 'selected' : ''}}>Bengali</option>
+                       </select>
+                   </div>
+               </div>
             <div class="row">
                 <div class="col-md-12">
                     <div class="card">
                         <div class="card-header">
-                            <h1>Student 
-                                <a href="" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#studentModal">Add new student</a>
+                            
+                            <h1>{{ __('text.content') }}
+                                <a href="" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#studentModal">{{ __('text.addNew')}} </a>
                                 <a href="" class="btn btn-danger" id="deleteAllSelectedRecord">Delete Selected</a>
                             </h1>
                         </div>
@@ -137,6 +149,7 @@
     </section>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js" integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
     <script>
         // alert('helo');
@@ -217,7 +230,8 @@
         function deleteStudent(id){
             if(confirm("Dou you really want to delete this record?")){
                 $.ajax({
-                    url:'/student/'+id,
+                    //url:'/student/'+id,
+                    url: "{{ route('student.delete',['id' => $student->id ])}}",
                     type: 'DELETE',
                     data: {
                         _token : $("input[name = _token]").val()
@@ -260,6 +274,17 @@
                 });
             });
         }); 
+    </script>
+    
+    <script type="text/javascript">
+     
+      var url = "{{ route('lang.change') }}";
+    
+        $('.lang-change').change(function(){
+         let lang_code = $(this).val();
+          window.location.href = url + "?lang="+ lang_code;
+        });
+    
     </script>
   </body>
 </html>
